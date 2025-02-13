@@ -1,0 +1,3 @@
+Go to the RabbitMQ management UI at http://localhost:15672 and
+navigate to the "Exchanges" tab.
+Create a new exchange called peril_direct with the type direct.
