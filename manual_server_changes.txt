@@ -1,3 +1,16 @@
 Go to the RabbitMQ management UI at http://localhost:15672 and
 navigate to the "Exchanges" tab.
 Create a new exchange called peril_direct with the type direct.
+
+
+Open the Management UI and navigate to the "Queues" tab. Click the "Add a new queue" dropdown at the bottom left.
+Name the queue "pause_test", because we're just going to use it temporarily to test our server's ability to publish messages.
+Leave the durability as "Durable" and create the queue. If you screw it up, you can click on the queue, delete it, and try again.
+Click on the queue, then go to the "Bindings" section. You'll be able to see that the queue is already bound to the default exchange. Add an additional binding to the peril_direct exchange.
+
+    "From exchange": peril_direct
+    "Routing key": Use the exact string of the PauseKey constant from the internal/routing package. This is a direct exchange, so the routing key must match exactly.
+
+Click "Bind".
+
+Run the client as suntzu again, making sure the queue is recreated.
