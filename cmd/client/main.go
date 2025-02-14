@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"os/signal"
 
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/gamelogic"
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/pubsub"
@@ -42,10 +40,57 @@ func main() {
 		return
 	}
 
-	// Wait for a signal to exit and if received, close the connection
-	signalChannel := make(chan os.Signal, 1)
-	signal.Notify(signalChannel, os.Interrupt)
-	<-signalChannel
+	// Create a new game state
+	gameState := gamelogic.NewGameState(username)
 
-	fmt.Println("\nGoodbye!")
+	// Start an infinite loop
+	for {
+
+		// Get user input
+		words := gamelogic.GetInput()
+		if len(words) == 0 {
+			continue
+		}
+
+		// Handle spawn
+		if words[0] == "spawn" {
+			if err := gameState.CommandSpawn(words); err != nil {
+				fmt.Println(err)
+			}
+		}
+
+		// Handle move
+		if words[0] == "move" {
+			_, err := gameState.CommandMove(words)
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
+
+		// Handle status
+		if words[0] == "status" {
+			gameState.CommandStatus()
+		}
+
+		// Handle help
+		if words[0] == "help" {
+			gamelogic.PrintClientHelp()
+		}
+
+		// Hndle spam
+		if words[0] == "spam" {
+			fmt.Println("Spamming not allowed yet!")
+		}
+
+		// Handle quit
+		if words[0] == "quit" {
+			gamelogic.PrintQuit()
+			return
+		}
+
+		// Handle unknown
+		if words[0] != "spawn" && words[0] != "move" && words[0] != "status" && words[0] != "help" && words[0] != "spam" && words[0] != "quit" {
+			fmt.Printf("Don't understand command: %v\n", words[0])
+		}
+	}
 }
