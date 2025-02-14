@@ -1,8 +1,10 @@
+*
 Go to the RabbitMQ management UI at http://localhost:15672 and
 navigate to the "Exchanges" tab.
 Create a new exchange called peril_direct with the type direct.
 
 
+*
 Open the Management UI and navigate to the "Queues" tab. Click the "Add a new queue" dropdown at the bottom left.
 Name the queue "pause_test", because we're just going to use it temporarily to test our server's ability to publish messages.
 Leave the durability as "Durable" and create the queue. If you screw it up, you can click on the queue, delete it, and try again.
@@ -14,3 +16,15 @@ Click on the queue, then go to the "Bindings" section. You'll be able to see tha
 Click "Bind".
 
 Run the client as suntzu again, making sure the queue is recreated.
+
+
+*
+Start 3 clients, each in their own terminal. Use the usernames washington, napoleon, and churchill.
+Run the server again to pause the game.
+You should see 3 queues created in the RabbitMQ management UI, each with its own copy of the "pause" message.
+
+
+*
+Open the RabbitMQ management UI and click on the exchanges tab.
+
+Create a new exchange with type topic, and name it peril_topic.

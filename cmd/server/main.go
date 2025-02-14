@@ -2,8 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
-	"os/signal"
 
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/gamelogic"
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/pubsub"
@@ -29,6 +27,19 @@ func main() {
 	defer ch.Close()
 
 	fmt.Println("Connected to RabbitMQ!")
+
+	// Declare and bind the queue
+	_, _, err = pubsub.DeclareAndBind(
+		conn,                       // conn
+		routing.ExchangePerilTopic, // exchange
+		"game_logs",                // queueName
+		routing.GameLogSlug+".*",   // key
+		pubsub.Durable,             // simpleQueueType
+	)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	// Print server help
 	gamelogic.PrintServerHelp()
@@ -75,11 +86,4 @@ func main() {
 			fmt.Printf("Don't understand command: %v\n", words[0])
 		}
 	}
-
-	// Wait for a signal to exit and if received, close the connection
-	signalChannel := make(chan os.Signal, 1)
-	signal.Notify(signalChannel, os.Interrupt)
-	<-signalChannel
-
-	fmt.Println("\nGoodbye!")
 }
