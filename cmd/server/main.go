@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 
+	"github.com/bootdotdev/learn-pub-sub-starter/internal/gamelogic"
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/pubsub"
 	"github.com/bootdotdev/learn-pub-sub-starter/internal/routing"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -29,12 +30,50 @@ func main() {
 
 	fmt.Println("Connected to RabbitMQ!")
 
-	// Publish a message to the exchange
-	ps := routing.PlayingState{
-		IsPaused: true,
-	}
-	if err := pubsub.PublishJSON(ch, routing.ExchangePerilDirect, routing.PauseKey, ps); err != nil {
-		panic(err)
+	// Print server help
+	gamelogic.PrintServerHelp()
+
+	// Start an infinite loop
+	for {
+
+		// Get user input
+		words := gamelogic.GetInput()
+		if len(words) == 0 {
+			continue
+		}
+
+		// Check if the user wants to pause the game
+		if words[0] == "pause" {
+			fmt.Println("Sending pause message...")
+			ps := routing.PlayingState{
+				IsPaused: true,
+			}
+			if err := pubsub.PublishJSON(ch, routing.ExchangePerilDirect, routing.PauseKey, ps); err != nil {
+				panic(err)
+			}
+		}
+
+		// Check if the user wants to resume the game
+		if words[0] == "resume" {
+			fmt.Println("Sending resume message...")
+			ps := routing.PlayingState{
+				IsPaused: false,
+			}
+			if err := pubsub.PublishJSON(ch, routing.ExchangePerilDirect, routing.PauseKey, ps); err != nil {
+				panic(err)
+			}
+		}
+
+		// Check if the user wants to quit the game
+		if words[0] == "quit" {
+			fmt.Println("Exiting...")
+			break
+		}
+
+		// Check if the user gave an invalid command
+		if words[0] != "pause" && words[0] != "resume" && words[0] != "quit" {
+			fmt.Printf("Don't understand command: %v\n", words[0])
+		}
 	}
 
 	// Wait for a signal to exit and if received, close the connection
