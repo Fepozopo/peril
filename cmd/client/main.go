@@ -27,21 +27,22 @@ func main() {
 	}
 	fmt.Printf("Hello, %s! Let's start the game!\n", username)
 
-	// Call DeclareAndBind
-	_, _, err = pubsub.DeclareAndBind(
+	// Create a new game state
+	gameState := gamelogic.NewGameState(username)
+
+	// call SubscribeJSON
+	err = pubsub.SubscribeJSON(
 		conn,                          // conn
 		routing.ExchangePerilDirect,   // exchange
 		routing.PauseKey+"."+username, // queueName
 		routing.PauseKey,              // key
 		pubsub.Transient,              // simpleQueueType
+		handlerPause(gameState),
 	)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-
-	// Create a new game state
-	gameState := gamelogic.NewGameState(username)
 
 	// Start an infinite loop
 	for {
