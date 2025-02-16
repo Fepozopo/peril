@@ -1,30 +1,30 @@
-*
+=======================================================================
 Go to the RabbitMQ management UI at http://localhost:15672 and
 navigate to the "Exchanges" tab.
+
 Create a new exchange called peril_direct with the type direct.
+=======================================================================
 
 
-*
-Open the Management UI and navigate to the "Queues" tab. Click the "Add a new queue" dropdown at the bottom left.
-Name the queue "pause_test", because we're just going to use it temporarily to test our server's ability to publish messages.
-Leave the durability as "Durable" and create the queue. If you screw it up, you can click on the queue, delete it, and try again.
-Click on the queue, then go to the "Bindings" section. You'll be able to see that the queue is already bound to the default exchange. Add an additional binding to the peril_direct exchange.
-
-    "From exchange": peril_direct
-    "Routing key": Use the exact string of the PauseKey constant from the internal/routing package. This is a direct exchange, so the routing key must match exactly.
-
-Click "Bind".
-
-Run the client as suntzu again, making sure the queue is recreated.
-
-
-*
-Start 3 clients, each in their own terminal. Use the usernames washington, napoleon, and churchill.
-Run the server again to pause the game.
-You should see 3 queues created in the RabbitMQ management UI, each with its own copy of the "pause" message.
-
-
-*
+=======================================================================
 Open the RabbitMQ management UI and click on the exchanges tab.
 
 Create a new exchange with type topic, and name it peril_topic.
+=======================================================================
+
+
+=======================================================================
+Using the UI, create a new exchange called peril_dlx of type fanout.
+
+Use the default settings.
+=======================================================================
+
+
+=======================================================================
+Using the UI, create a new queue called peril_dlq.
+
+Go to the queue's page
+and bind the queue to the peril_dlx exchange with no routing key.
+
+Leave the default settings.
+=======================================================================
