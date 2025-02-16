@@ -19,17 +19,8 @@ func main() {
 	}
 	defer conn.Close()
 
-	// Create a new channel
-	ch, err := conn.Channel()
-	if err != nil {
-		panic(err)
-	}
-	defer ch.Close()
-
-	fmt.Println("Connected to RabbitMQ!")
-
 	// Declare and bind the queue
-	_, _, err = pubsub.DeclareAndBind(
+	ch, _, err := pubsub.DeclareAndBind(
 		conn,                       // conn
 		routing.ExchangePerilTopic, // exchange
 		"game_logs",                // queueName
@@ -40,6 +31,7 @@ func main() {
 		fmt.Println(err)
 		return
 	}
+	defer ch.Close()
 
 	// Print server help
 	gamelogic.PrintServerHelp()

@@ -43,14 +43,15 @@ func DeclareAndBind(
 	}
 
 	// Declare the queue.
-	// noWait is false so we wait for a confirmation, and arguments is nil.
+	// noWait is false so we wait for a confirmation.
+	queueArgs := amqp.Table{"x-dead-letter-exchange": "peril_dlx"}
 	queue, err := ch.QueueDeclare(
 		queueName,  // queue name
 		durable,    // durable - stays available after broker restart if true
 		autoDelete, // autoDelete - deleted when last consumer disconnects if true
 		exclusive,  // exclusive - only accessible by the current connection if true
 		false,      // noWait - false, wait for a server reply
-		nil,        // arguments
+		queueArgs,  // arguments
 	)
 	if err != nil {
 		ch.Close()
