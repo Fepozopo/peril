@@ -20,6 +20,15 @@ func main() {
 	defer conn.Close()
 
 	// Create a new channel
+	ch, err := conn.Channel()
+	if err != nil {
+		panic(err)
+	}
+	defer ch.Close()
+
+	fmt.Println("Connected to RabbitMQ!")
+
+	// Welcome the user
 	username, err := gamelogic.ClientWelcome()
 	if err != nil {
 		fmt.Println(err)
@@ -30,7 +39,21 @@ func main() {
 	// Create a new game state
 	gameState := gamelogic.NewGameState(username)
 
-	// call SubscribeJSON
+	// Subscribe to moves from other players
+	err = pubsub.SubscribeJSON(
+		conn,                                 // conn
+		routing.ExchangePerilTopic,           // exchange
+		routing.ArmyMovesPrefix+"."+username, // queueName
+		routing.ArmyMovesPrefix+".*",         // key
+		pubsub.Transient,                     // simpleQueueType
+		handlerMove(gameState),
+	)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// Subscribe to pauses
 	err = pubsub.SubscribeJSON(
 		conn,                          // conn
 		routing.ExchangePerilDirect,   // exchange
@@ -62,9 +85,20 @@ func main() {
 
 		// Handle move
 		if words[0] == "move" {
-			_, err := gameState.CommandMove(words)
+			move, err := gameState.CommandMove(words)
 			if err != nil {
 				fmt.Println(err)
+			} else {
+				err = pubsub.PublishJSON(
+					ch,                                   // channel
+					routing.ExchangePerilTopic,           // exchange
+					routing.ArmyMovesPrefix+"."+username, // routing key
+					move,
+				)
+				if err != nil {
+					fmt.Println(err)
+				}
+				fmt.Println("Move published successfully.")
 			}
 		}
 
