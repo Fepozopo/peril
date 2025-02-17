@@ -46,7 +46,7 @@ func main() {
 		routing.ArmyMovesPrefix+"."+username, // queueName
 		routing.ArmyMovesPrefix+".*",         // key
 		pubsub.Transient,                     // simpleQueueType
-		handlerMove(gameState),
+		handlerMove(gameState, ch),
 	)
 	if err != nil {
 		fmt.Println(err)
@@ -61,6 +61,20 @@ func main() {
 		routing.PauseKey,              // key
 		pubsub.Transient,              // simpleQueueType
 		handlerPause(gameState),
+	)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	// Subscribe to wars
+	err = pubsub.SubscribeJSON(
+		conn,                               // conn
+		routing.ExchangePerilTopic,         // exchange
+		"war",                              // queueName
+		routing.WarRecognitionsPrefix+".*", // key
+		pubsub.Durable,                     // simpleQueueType
+		handlerWar(gameState),              // handler
 	)
 	if err != nil {
 		fmt.Println(err)
