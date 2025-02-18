@@ -39,20 +39,6 @@ func main() {
 	// Create a new game state
 	gameState := gamelogic.NewGameState(username)
 
-	// Subscribe to moves from other players
-	err = pubsub.SubscribeJSON(
-		conn,                                 // conn
-		routing.ExchangePerilTopic,           // exchange
-		routing.ArmyMovesPrefix+"."+username, // queueName
-		routing.ArmyMovesPrefix+".*",         // key
-		pubsub.Transient,                     // simpleQueueType
-		handlerMove(gameState, ch),
-	)
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
 	// Subscribe to pauses
 	err = pubsub.SubscribeJSON(
 		conn,                          // conn
@@ -67,6 +53,20 @@ func main() {
 		return
 	}
 
+	// Subscribe to moves from other players
+	err = pubsub.SubscribeJSON(
+		conn,                                 // conn
+		routing.ExchangePerilTopic,           // exchange
+		routing.ArmyMovesPrefix+"."+username, // queueName
+		routing.ArmyMovesPrefix+".*",         // key
+		pubsub.Transient,                     // simpleQueueType
+		handlerMove(gameState, ch),
+	)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
 	// Subscribe to wars
 	err = pubsub.SubscribeJSON(
 		conn,                               // conn
@@ -74,7 +74,7 @@ func main() {
 		"war",                              // queueName
 		routing.WarRecognitionsPrefix+".*", // key
 		pubsub.Durable,                     // simpleQueueType
-		handlerWar(gameState),              // handler
+		handlerWar(gameState, ch),          // handler
 	)
 	if err != nil {
 		fmt.Println(err)
