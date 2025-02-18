@@ -19,19 +19,30 @@ func main() {
 	}
 	defer conn.Close()
 
-	// Declare and bind the queue
-	ch, _, err := pubsub.DeclareAndBind(
+	// Create a new channel
+	ch, err := conn.Channel()
+	if err != nil {
+		panic(err)
+	}
+	defer ch.Close()
+
+	// Subscribe to the game_logs queue
+	err = pubsub.SubscribeGob(
 		conn,                       // conn
 		routing.ExchangePerilTopic, // exchange
 		"game_logs",                // queueName
 		routing.GameLogSlug+".*",   // key
 		pubsub.Durable,             // simpleQueueType
+		func(log routing.GameLog) pubsub.AckType {
+			defer fmt.Print("> ")
+			gamelogic.WriteLog(log)
+			return pubsub.Ack
+		},
 	)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	defer ch.Close()
 
 	// Print server help
 	gamelogic.PrintServerHelp()
