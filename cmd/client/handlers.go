@@ -71,7 +71,7 @@ func handlerWar(gs *gamelogic.GameState, ch *amqp.Channel) func(gamelogic.Recogn
 			Message:     message,
 			Username:    rw.Attacker.Username,
 		}
-		err := pubsub.PublishGob(ch, routing.ExchangePerilTopic, fmt.Sprintf("%s.%s", routing.GameLogSlug, gameLog.Username), &gameLog)
+		err := pubsub.PublishJSON(ch, routing.ExchangePerilTopic, fmt.Sprintf("%s.%s", routing.GameLogSlug, gameLog.Username), &gameLog)
 		if err != nil {
 			return pubsub.NackRequeue
 		}

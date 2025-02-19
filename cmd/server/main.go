@@ -27,7 +27,7 @@ func main() {
 	defer ch.Close()
 
 	// Subscribe to the game_logs queue
-	err = pubsub.SubscribeGob(
+	err = pubsub.SubscribeJSON(
 		conn,                       // conn
 		routing.ExchangePerilTopic, // exchange
 		"game_logs",                // queueName

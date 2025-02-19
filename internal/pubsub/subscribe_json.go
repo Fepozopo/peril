@@ -35,6 +35,11 @@ func SubscribeJSON[T any](
 		return fmt.Errorf("failed to declare and bind queue: %w", err)
 	}
 
+	// Limit the prefetch count to 10
+	if err := ch.Qos(10, 0, false); err != nil {
+		return fmt.Errorf("failed to set QoS: %w", err)
+	}
+
 	// Get a new chan of amqp.Delivery structs
 	msgs, err := ch.Consume(
 		queue.Name, // queue name
